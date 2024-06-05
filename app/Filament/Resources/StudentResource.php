@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StudentResource\Pages;
 use App\Filament\Resources\StudentResource\RelationManagers;
+use App\Models\Section;
 use App\Models\Student;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -24,9 +25,16 @@ class StudentResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('class_id')
-                    ->relationship('class', 'name'),
-//                Forms\Components\Select::make('section_id')
-//                    ->relationship('section', 'name'),
+                    ->relationship('class', 'name')
+                    ->live(),
+                Forms\Components\Select::make('section_id')
+                    ->options(function(Forms\Get $get) {
+                        $classId = $get('class_id');
+                        // info($classId);
+                        if($classId) {
+                            return Section::where('class_id', $classId)->pluck('name', 'id')->toArray();
+                        }
+                    }),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->autofocus(),
